@@ -1,0 +1,31 @@
+name: Prebuild for Render
+
+on:
+  workflow_dispatch:  # runs only when you click "Run workflow" in GitHub Actions
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build project
+        run: npm run build
+
+      - name: Prepare branch for Render
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git checkout --orphan render-deploy
+          git --work-tree dist add --all
+          git commit -m "Render deploy build"
+          git push origin HEAD:render-deploy --force
